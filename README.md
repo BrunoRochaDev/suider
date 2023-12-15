@@ -1,20 +1,21 @@
 # SUIDer
 
-This script is developed to make your privilege escalation fast and reliable in linux.
+This repository is a modified version of [etc5had0w's SUID binary exploitation tool](https://github.com/etc5had0w/suider).
 
-This tool will quickly search for exploitable binaries with SUID bit set in linux and will output the method of exploitation from GTFObins.
+The adjustments include an updated list of vulnerable binaries sourced from [GTFOBins](https://gtfobins.github.io/), as well as the distinction between "SUID" and "Limited SUID".
 
-do not totally rely on this tool as their might be some suid binaries that are not avaialbe and may require a custom exploit.
-
-all the links for exploit methods are provided from GTFObins :https://gtfobins.github.io/
+Notably, the tool no longer conducts a search for SUID binaries on the local machine; instead, it requires a text file containing the output of a search conducted on the target machine.
 
 ## How To Use :
 
 * Copy paste this code to clone this script into your system by : 
-`git clone https://github.com/etc5had0w/suider.git`
+`git clone https://github.com/BrunoRochaDev/suider.git`
 
-* transfer this file to victim machine and set permission to make it executable by :
+* Set permission to make it executable by :
 `chmod +x suider.sh`
 
-* run the script and open the exploit method link from gtfobins!
-`./suider.sh`
+* On the target machine, search for SUID binaries and save the output to a file :
+`find / -perm -u=s -type f 2>/dev/null > suid.txt`
+
+* Back on your system, run the script with the output file as a parameter.
+`./suider.sh ./suid.txt`
