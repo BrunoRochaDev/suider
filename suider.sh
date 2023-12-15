@@ -1,45 +1,40 @@
 #!/bin/bash
-#Author : etc5had0w
-#Github : https://github.com/etc5had0w
-# This Tool Searches For known explotable Binaries that has SUID bit set.
-# Warning : There might be custom binaries with SUID bit but this tool only outputs standard binaries with thier available exploit from GTFOBINS.
+#Based on the works of : etc5had0w
+#Original: https://github.com/etc5had0w/suider
 echo "==================================="
 echo " SUIDER - SUID Exploit Finder Tool "
 echo "==================================="
 
 echo "[+] Looking for standard exploitable SUID binaries...."
-r=$(find / -perm -u=s -type f 2>/dev/null | rev | cut -d'/' -f 1 | rev)
 
+suid_binaries=$(find / -perm -u=s -type f 2>/dev/null | rev | cut -d'/' -f 1 | rev)
 
-output=($r)
-dict=(aria2c arp ash base32 base64 basenc bash busybox capsh cat chmod chown chroot column comm cp csh csplit curl cut dash date dd dialog diff dmsetup docker emacs env eqn expand expect find flock fmt fold gdb gimp grep gtester hd head hexdump highlight iconv install ionice ip jjs join jq jrunscript ksh ks ld.so less logsave look lwp-download lwp-request make more mv nano nice nl node nohup od openssl paste perl pg php pico pr python readelf restic rev rlwrap rpm rpmquery rsync run-parts rview rvim sed setarch shuf soelim sort ss ssh-keyscan start-stop-daemon stdbuf strace strings sysctl systemctl tac tail taskset tbl tclsh tee tftp time timeout troff ul unexpand uniq unshare update-alternatives uudecode uuencode view vim watch wget xargs xmodmap xxd xz zsh zsoelim)
+suid=(
+    aa-exec ab agetty alpine ar arj arp as ascii-xfr ash aspell atobm awk base32 base64 basenc basez bash bc bridge busybox bzip2 cabal capsh cat chmod choom chown chroot clamscan cmp column comm cp cpio cpulimit csh csplit csvtool cupsfilter curl cut dash date dd debugfs dialog diff dig distcc dmsetup docker dosbox ed efax elvish emacs env eqn espeak expand expect file find fish flock fmt fold gawk gcore gdb genie genisoimage gimp grep gtester gzip hd head hexdump highlight hping3 iconv install ionice ip ispell jjs join jq jrunscript julia ksh ksshell kubectl ld.so less logsave look lua make mawk minicom more mosquitto msgattrib msgcat msgconv msgfilter msgmerge msguniq multitime mv nasm nawk ncftp nft nice nl nm nmap node nohup od openssl openvpn pandoc paste perf perl pexec pg php pidstat pr ptx python rc readelf restic rev rlwrap rsync rtorrent run-parts rview rvim sash scanmem sed setarch setfacl setlock shuf soelim softlimit sort sqlite3 ss ssh-agent ssh-keygen ssh-keyscan sshpass start-stop-daemon stdbuf strace strings sysctl systemctl tac tail taskset tbl tclsh tee terraform tftp tic time timeout troff ul unexpand uniq unshare unsquashfs unzip update-alternatives uudecode uuencode vagrant view vigr vim vimdiff vipw w3m watch wc wget whiptail xargs xdotool xmodmap xmore xxd xz yash zsh zsoelim
+)
 
-result=()
+limited_suid=(
+    aria2c awk batcat byebug composer dc dvips ed gawk ginsh git iftop joe latex ldconfig lftp lua lualatex luatex mawk mysql nano nawk nc nmap octave pdflatex pdftex pic pico posh pry psftp rake rpm rpmdb rpmquery rpmverify runscript rview rvim scp scrot slsh socat sqlite3 tar tasksh tdbtool telnet tex tmate view vim vimdiff watch xelatex xetex zip
+)
 
-for a in "${output[@]}"; do
-    for b in "${dict[@]}"; do
-        if [[ $a == "$b" ]]; then
-            result+=( "$a" )
-            break
-        fi
-    done
+exploitable_results=()
+for binary in $suid_binaries; do
+    if [[ " ${suid[@]} " =~ " $binary " ]]; then
+        exploitable_results+=( "$binary:SUID" )
+    elif [[ " ${limited_suid[@]} " =~ " $binary " ]]; then
+        exploitable_results+=( "$binary:Limited SUID" )
+    fi
 done
 
-if [[ -z ${result[@]} ]]
-then 
-	echo "[-] Nothing Found!"
-
+if [[ ${#exploitable_results[@]} -eq 0 ]]; then 
+    echo "[-] Nothing Found!"
 else
-
-	echo '------------------------------'
-	echo " LIST OF EXPLOITABLE BINARIES"
-	echo '------------------------------'
-	
-
-	for i in "${result[@]}"
-	do
-
-		printf '%s' "[+] $i : "
-		echo " https://gtfobins.github.io/gtfobins/$i "
-	done
+    echo '------------------------------'
+    echo " LIST OF EXPLOITABLE BINARIES"
+    echo '------------------------------'
+    
+    for result in "${exploitable_results[@]}"; do
+        IFS=":" read -r binary type <<< "$result"
+        printf '[+] %s : https://gtfobins.github.io/gtfobins/%s [%s]\n' "$binary" "$binary" "$type"
+    done
 fi
